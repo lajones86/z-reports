@@ -1,0 +1,25 @@
+{
+    "name": "Z-Reports Extractor",
+    "version":  "0.1.2",
+    "description":  "Pull data from websites for z-reports processing.",
+    "manifest_version": 2,
+
+    "icons": {
+        "48": "icons/clickme-48.png"
+    },
+
+    "permissions": [
+        "tabs",
+        "activeTab",
+        "downloads",
+        "notifications"
+    ],
+
+    "browser_action": {
+        "default_icon": "icons/clickme-32.png"
+    },
+
+    "background": {
+        "scripts": ["background.js"]
+    }
+}

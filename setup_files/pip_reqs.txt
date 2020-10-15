@@ -1,0 +1,6 @@
+numpy
+xlsxwriter
+pandas
+requests-html
+yahoo-fin
+mechanicalsoup

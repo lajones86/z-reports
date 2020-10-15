@@ -1,0 +1,81 @@
+import ctypes
+import os
+import shutil
+import subprocess
+
+def get_input(acceptable_list):
+    selection = None
+    while not selection:
+        selection = input("> ")
+        if not selection in acceptable_list:
+            print("Invalid selection")
+            selection = None
+    return(selection)
+
+def exit_error(message, exit_val = 1):
+    print("Error")
+    print(message)
+    input("Press Enter to exit.")
+    exit(exit_val)
+
+def main():
+    setup_files = os.path.join(os.path.split(os.path.realpath(__file__))[0], "setup_files")
+    #check for admin rights
+    admin_creds = None
+    if not ctypes.windll.shell32.IsUserAnAdmin():
+        exit_error("Setup script must be run as admin.", 1)
+
+    #verify install parameters
+    install_path = os.path.join(os.environ["USerProfile"], "Desktop\z-reports")
+    verify_path = None
+    while not verify_path:
+        print("Install to %s" % install_path)
+        print("y/n")
+        verify_path = get_input(["y", "Y", "n", "N"]).lower()
+        if verify_path == "n":
+            verify_path = None
+            install_path = input("Enter new path: ")
+
+    #copy application files
+    app_source = os.path.join(os.path.split(os.path.realpath(__file__))[0], "application_files")
+    copy_error = False
+    try:
+        shutil.copytree(app_source, install_path, dirs_exist_ok = True)
+    except:
+        copy_error = True
+    if not os.path.isdir(install_path):
+        copy_error = True
+    if copy_error:
+        exit_error("Application files could not be copied.", 2)
+    print("Files copied successfully.")
+
+    #copy csv files if they don't already exist
+    csv_source = os.path.join(os.path.split(os.path.realpath(__file__))[0], "csv_data")
+    csv_dest = os.path.join(install_path, "csv_data")
+    if not os.path.isdir(csv_dest):
+        os.mkdir(csv_dest)
+    for root, dirs, files in os.walk(csv_source):
+        for d in dirs:
+            d = os.path.join(root, d).replace(csv_source, csv_dest)
+            if not os.path.isdir(d):
+                os.makedirs(d)
+        for f in files:
+            source_f = os.path.join(root, f)
+            dest_f = source_f.replace(csv_source, csv_dest)
+            if not os.path.isfile(dest_f):
+                shutil.copyfile(source_f, dest_f)
+
+
+    #install pip stuff
+    pip_listing = []
+    subprocess.check_call(["pip3", "install", "-r", os.path.join(setup_files, "pip_reqs.txt")])
+    pip_test_path = os.path.join(setup_files, "pip_test.py")
+    pip_test = subprocess.check_call(["python", pip_test_path])
+    if pip_test != 0:
+        exit_error("Could not import %s required moduled." % pip_test)
+
+    print("Setup successful.")
+    return(0)
+
+if __name__ == "__main__":
+    exit(main())
