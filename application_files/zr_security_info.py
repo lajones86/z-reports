@@ -2,6 +2,7 @@ import os
 
 import zr_io
 import zr_csv
+import zr_config
 
 def get_symbol(symbol, element, default_type = None):
 
@@ -13,15 +14,7 @@ def get_symbol(symbol, element, default_type = None):
             ]
     default_data = [[symbol, "Unknown", "Unknown"]]
 
-    #create data structure if it doesn't exist
-    data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "csv_data")
-    csv_source = "securities_info.csv"
-
-    if not os.path.isdir(data_dir):
-        print("Creating .csv data directory at %s" % data_dir)
-        os.makedirs(data_dir)
-
-    file_path = os.path.join(data_dir, csv_source)
+    file_path = zr_config.get_path("securities_info")
 
     csv_file = zr_csv.CsvFile(file_path, default_column_list = column_list,
             default_data_rows = default_data, read_only = False,

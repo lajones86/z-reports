@@ -6,11 +6,12 @@ import zr_io
 
 def environment(element):
     money_dir = os.path.join(os.environ.get('USERPROFILE'), "Personal\money")
-    securities_dir = os.path.join(money_dir, "securities")
+    reports_dir = os.path.join(money_dir, "reports")
+
     local_environment = {
-            "securities_dir" : securities_dir,
+            "reports_dir" : reports_dir,
             "data_dir" : os.path.join(money_dir, "script_data"),
-            "securities_csv_dir" : os.path.join(securities_dir, "z_csv"),
+            "reports_csv_dir" : os.path.join(reports_dir, "z_csv"),
             "investments_dir" : os.path.join(money_dir, "investments"),
             }
     return(local_environment[element])
@@ -62,6 +63,7 @@ def get_path(key):
             "history" : os.path.join(environment("data_dir"), "history"),
             "treasuries" : os.path.join(environment("investments_dir"), "treasuries.html"),
             "physical_commodities" : os.path.join(environment("investments_dir"), "physical_commodities.csv"),
+            "securities_info" : os.path.join(environment("data_dir"), "securities_info.csv")
             }
 
     return(get_public("paths", key, defaults))
@@ -86,8 +88,8 @@ def get_beta(key):
             # adj_close is adjusted for dividends
             #"close_price_col" : "close",
             "close_price_col" : "adj_close",
-            "csv_out" : os.path.join(environment("securities_csv_dir"), "beta.csv"),
-            "xlsx_out" : os.path.join(environment("securities_dir"), "Z-Report-Beta.xlsx"),
+            "csv_out" : os.path.join(environment("reports_csv_dir"), "beta.csv"),
+            "xlsx_out" : os.path.join(environment("reports_dir"), "Z-Report-Beta.xlsx"),
             }
 
     return(get_public("beta", key, defaults))

@@ -451,6 +451,9 @@ def test():
     for i in csv_file.find_by_dict_strcomp({"Name" : "Bar", "Meaningful" : "False"}):
         print(i)
 
+    for i in csv_file.return_all():
+        print(i)
+
     exit(0)
 
 if __name__ == "__main__":
