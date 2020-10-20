@@ -1,4 +1,5 @@
 import re
+import zr_io
 
 #object for tracking variables for the treasury.gov website
 class SiteTreasuryBond():
@@ -9,7 +10,10 @@ class SiteTreasuryBond():
         self.value = re_value.search(variable_line).group(0).replace("value=", "").replace("\"", "")
 
 
-def get_by_xpath(root_element, xpath, min_results = None, max_results = None, description = ""):
+def get_by_xpath(root_element, xpath, min_results = None, max_results = None, description = None):
+
+    if description == None:
+        description = ""
 
     return_collection = root_element.xpath(xpath)
 
@@ -27,7 +31,10 @@ def get_by_xpath(root_element, xpath, min_results = None, max_results = None, de
     return(return_collection)
 
 
-def map_table_from_thead(thead_element, desired_headers_contain = []):
+def map_table_from_thead(thead_element, desired_headers_contain = None):
+
+    if desired_headers_contain == None:
+        desired_headers_contain = []
 
     th_collection = get_by_xpath(thead_element, ".//th",
             min_results = 1, description = "Table mapping")

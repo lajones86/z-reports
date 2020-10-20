@@ -45,12 +45,27 @@ def get_account(download_dirs = None):
                 description = "Fidelity table symbol span"))[0]
         symbol = str(symbol_span.text).strip()
 
+        quantity = float((tr[table_map["quantity"]]).text)
+
         if symbol.endswith("**"):
-            print("Skipping core position %s." % symbol)
+            print("Setting cash position.")
+            fidelity_account.cash_position = float(quantity)
         else:
             print("Processing %s" % symbol)
-            quantity = float((tr[table_map["quantity"]]).text)
             fidelity_account.add_position_by_data(symbol, quantity)
+
+    #add pending activity to cash position
+    print("Adjusting cash position with pending activity")
+    pending_activity_div = zt_html.get_by_xpath(fidelity_html,
+            "//div[@class='magicgrid--total-pending-activity-link-container']",
+            min_results = 1, max_results = 1,
+            description = "Pending activity div")[0]
+
+    pending_activity_value = float((zt_html.get_by_xpath(pending_activity_div,
+            ".//span[@class='value']", min_results = 1, max_results = 1,
+            description = "Pending activity value")[0].text).strip().replace("$", ""))
+
+    fidelity_account.cash_position += pending_activity_value
 
     return(fidelity_account)
 

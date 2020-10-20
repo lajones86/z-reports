@@ -42,11 +42,12 @@ from copy import deepcopy
 
 
 class CsvColumnMap:
-    def __init__(self, provided_columns = []):
+    def __init__(self, provided_columns = None):
         self.columns = []
 
-        for provided_column in provided_columns:
-            self.add_column(provided_column)
+        if provided_columns != None:
+            for provided_column in provided_columns:
+                self.add_column(provided_column)
 
     def add_column(self, column_to_add):
         if column_to_add.is_row_identifier:
@@ -83,7 +84,13 @@ class CsvColumnMap:
 #float
 #bool
 class CsvColumn:
-    def __init__(self, name, data_type = "str", is_row_identifier = False, overwrite_with_default = False):
+    def __init__(self, name, data_type = None, is_row_identifier = None, overwrite_with_default = None):
+        if data_type == None:
+            data_type = "str"
+        if is_row_identifier == None:
+            is_row_identifier = False
+        if overwrite_with_default == None:
+            overwrite_with_default = False
         self.name = name
         self.is_row_identifier = is_row_identifier
         self.default_position = None
@@ -105,7 +112,20 @@ class CsvColumn:
 #store header map in self.column_map
 #store data in self.data
 class CsvFile:
-    def __init__(self, path, default_column_list = [], default_data_rows = [], stop_on_write = True, read_only = True):
+    def __init__(self, path, default_column_list = None, default_data_rows = None, stop_on_write = None, read_only = None):
+        if default_column_list == None:
+            default_column_list = []
+
+        if default_data_rows == None:
+            default_data_rows = []
+
+        if stop_on_write == None:
+            stop_on_write = True
+
+        if read_only == None:
+            read_only = True
+
+
         self.read_only = read_only
         if not self.read_only:
             if len(default_column_list) == 0:
@@ -190,7 +210,9 @@ class CsvFile:
         return(return_list)
 
 
-    def find_by_id(self, id_to_find, strcomp = False):
+    def find_by_id(self, id_to_find, strcomp = None):
+        if strcomp == None:
+            strcomp = False
         if strcomp == True:
             id_to_find = str(id_to_find)
         id_col = self.column_map.get_identifier()
@@ -212,7 +234,9 @@ class CsvFile:
         return(self.find_by_id(id_to_find, strcomp = True))
 
 
-    def find_by_dict(self, dict_params, strcomp = False):
+    def find_by_dict(self, dict_params, strcomp = None):
+        if strcomp == None:
+            strcomp = False
         return_list = []
         for row in self.data:
             row_is_match = True

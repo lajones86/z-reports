@@ -143,7 +143,7 @@ def load_portfolio_betas(positions):
     db_conn.close()
     return(0)
 
-def print_beta_sheet(positions, xl_workbook, sheetname, master_sheet, is_workbook):
+def print_beta_sheet(positions, xl_workbook, sheetname, master_sheet):
     benchmark = zr_config.get_beta("benchmark")
 
     #just end this function if the benchmark is the only thing in it
@@ -163,8 +163,6 @@ def print_beta_sheet(positions, xl_workbook, sheetname, master_sheet, is_workboo
     #build header listing
     headers = []
     initial_headers = ["Symbol", "Quantity", "Last Price", "Equity"]
-    if is_workbook:
-        initial_headers = ["Symbol", "Description", "Quantity", "Last Price", "Equity"]
 
     for header in initial_headers:
         if not header in headers:
@@ -219,9 +217,6 @@ def print_beta_sheet(positions, xl_workbook, sheetname, master_sheet, is_workboo
             xl_row += 1
             symbol_dict[position.symbol] = xl_row + 1
             xl_worksheet.write(xl_row, headers.index("Symbol"), position.symbol, xl_symbol)
-
-            if is_workbook:
-                xl_worksheet.write(xl_row, headers.index("Description"), position.description)
 
             #calculate equity
             xl_worksheet.write_formula(
@@ -435,16 +430,11 @@ def print_overview(xl_workbook, sheetname, beta_sheets):
 
 
 def print_xlsx(positions, filename_suffix = None):
-    xl_wb_path = zr_config.get_beta("xlsx_out")
-
-    #add filename suffix if one is specified and set
-    #is_workbook flag if the suffix is "-Workbook"
-    is_workbook = False
+    filename = "Z-Report-Beta"
     if filename_suffix:
-        front_path, extension = os.path.splitext(xl_wb_path)
-        xl_wb_path = front_path + filename_suffix + extension
-        if filename_suffix == "-Workbook":
-            is_workbook = True
+        filename += filename_suffix
+    filename += ".xlsx"
+    xl_wb_path = os.path.join(zr_config.get_path("reports_dir"), filename)
 
     xl_workbook = xlsxwriter.Workbook(xl_wb_path)
     xl_dir = os.path.split(xl_wb_path)[0]
@@ -464,7 +454,7 @@ def print_xlsx(positions, filename_suffix = None):
 
     industries.sort()
     purposes.sort()
-    beta_sheets = [print_beta_sheet(positions, xl_workbook, "Beta - Master", None, is_workbook)]
+    beta_sheets = [print_beta_sheet(positions, xl_workbook, "Beta - Master", None)]
 
 
     #track our breakdown sheets and their total beta cells
@@ -475,8 +465,6 @@ def print_xlsx(positions, filename_suffix = None):
     #in case the lists are the same
     #tends to happen with the default bond script
     categories = [[industries, 0], [purposes, 1]]
-    if is_workbook:
-        categories = [[industries, 0]]
     for category in categories:
         for entry in category[0]:
             entry_positions = []
@@ -484,8 +472,6 @@ def print_xlsx(positions, filename_suffix = None):
                 if category[1] == 0:
                     criteria = position.industry
                     sheet_name_base = "Industry"
-                    if is_workbook:
-                        sheet_name_base = "Class"
                 elif category[1] == 1:
                     criteria = position.purpose
                     sheet_name_base = "Purpose"
@@ -496,23 +482,13 @@ def print_xlsx(positions, filename_suffix = None):
                     entry_positions.append(position)
 
             
-            new_beta_sheet = print_beta_sheet(entry_positions, xl_workbook, sheet_name, beta_sheets[0], is_workbook)
+            new_beta_sheet = print_beta_sheet(entry_positions, xl_workbook, sheet_name, beta_sheets[0])
             if new_beta_sheet:
                 beta_sheets.append(new_beta_sheet)
 
     print_overview(xl_workbook, "Beta - Overview", beta_sheets)
 
-
-    #close and write the workbook
-    while True:
-        try:
-            xl_workbook.close()
-            print("\nWorkbook written to %s" % xl_wb_path)
-            break
-        except:
-            if not zr_io.yes_no("Couldn't write Excel file. Close it if it's open. Try writing again?"):
-                break
-    return(0)
+    Excel.save_workbook(xl_workbook, xl_wb_path)
 
 
 def symbol_lookup():

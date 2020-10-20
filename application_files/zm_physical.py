@@ -28,12 +28,12 @@ def get_positions():
 
     for commodity in csv_file.return_all():
         if commodity["Quantity"] != 0:
-            adjusted_quantity = commodity["Quantity"] * commodity["Multiplier"]
-            positions.append(Instruments.StockPosition(commodity["Symbol"], adjusted_quantity))
+            positions.append(Instruments.TrackingCommodity(commodity["Symbol"], commodity["Description"], commodity["Quantity"], commodity["Multiplier"]))
 
     return(positions)
 
 if __name__ == "__main__":
     for position in get_positions():
-        print(position.symbol, position.quantity, position.last_price, position.equity)
+        print(position.symbol, position.description, position.quantity, position.multiplier)
+        print(position.emulated_stock.symbol, position.emulated_stock.quantity, position.emulated_stock.last_price, position.emulated_stock.equity)
 

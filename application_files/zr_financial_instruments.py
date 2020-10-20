@@ -39,12 +39,22 @@ class StockPosition:
         self.betas.append(Concepts.Beta(months, beta))
 
 
+class TrackingCommodity:
+    def __init__(self, symbol, description, quantity, multiplier):
+        self.symbol = symbol
+        self.description = description
+        self.quantity = quantity
+        self.multiplier = multiplier
+
+        self.emulated_stock = StockPosition(symbol, (quantity * multiplier))
+
+
 class BrokerageAccount:
     def __init__(self, name):
         self.name = name
         self.positions = []
         self.listing_date = None
-        self.cash_position = None
+        self.cash_position = 0
 
     def add_position_by_data(self, symbol, quantity):
         updated_existing = False

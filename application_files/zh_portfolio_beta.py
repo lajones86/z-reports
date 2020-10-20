@@ -13,13 +13,15 @@ def main():
         all_positions.append(position)
 
     for position in physical_commodities:
-        all_positions.append(position)
+        all_positions.append(position.emulated_stock)
 
     zr_db.sync_sqlite(all_positions)
 
     zk_beta.load_portfolio_betas(all_positions)
 
-    zk_beta.print_xlsx(all_positions)
+    zk_beta.print_xlsx(all_positions, "-All")
+
+    zk_beta.print_xlsx(fidelity_account.positions, "-Brokerages")
 
     exit(0)
 
