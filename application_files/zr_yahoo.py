@@ -92,8 +92,7 @@ def request(symbol, date):
             csv_path = get_filepath(symbol, prepend = "retry-")
             if download(symbol, date, date, csv_path, is_fix_attempt = True) == False:
                 print("Failed to get data from yahoo. Falling back to iexcloud.")
-                iexcloud_date = Calendar.get_trading_date(date)
-                iexcloud_request = Iexcloud.get_api_request(symbol, iexcloud_date)
+                iexcloud_request = Iexcloud.get_api_request(symbol, date)
                 iexcloud_response = Api.make_api_request(iexcloud_request)
                 if len(iexcloud_response) == 0:
                     return_empty = True

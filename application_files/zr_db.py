@@ -12,6 +12,8 @@ import zr_calendar as Calendar
 import zr_yahoo as Yahoo
 import zr_iexcloud as Iexcloud
 import zr_api as Api
+import zr_metals_api as MetalsApi
+import zr_exchangerates as ExchangeRates
 
 def purge(cursor):
     tables_to_keep = ["zmaintenance", "start_dates"]
@@ -155,6 +157,23 @@ def sync_stock_history(positions):
             history_db.execute("INSERT INTO '%s' VALUES ('%s','%s')" % (position.symbol, date, adj_close))
 
 
+def sync_metals_history(metals):
+    dates = get_dates_list()
+    history_db = get_history_db_cursor()
+
+    #aggregate missing dates across metals to minimize api calls
+    for metal in metals:
+        missing_dates = get_missing_dates(history_db, metal.symbol, dates)
+        if len(missing_dates) > 0:
+            ExchangeRates.download(metal.symbol)
+        for date in missing_dates:
+            close = ExchangeRates.get_close(metal.symbol, date)
+            print("Adding record for %s on %s: %s" % (metal.symbol, date, close))
+            history_db.execute("INSERT INTO '%s' VALUES ('%s','%s')" % (metal.symbol, date, close))
+    ExchangeRates.clean()
+    return(0)
+
+
 def sync_history(positions, positions_type):
     #sync benchmark
     if Config.get_yahoo("use_yahoo") == "False":
@@ -169,6 +188,9 @@ def sync_history(positions, positions_type):
     elif positions_type == "crypto":
         if Config.get_yahoo("use_yahoo") == "True":
             sync_stock_history(positions)
+
+    elif positions_type == "metals":
+        sync_metals_history(positions)
 
     if Config.get_yahoo("use_yahoo") == "True":
         Yahoo.clean()

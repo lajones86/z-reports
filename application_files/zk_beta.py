@@ -12,10 +12,8 @@ import zr_db as Db
 import zr_csv as Csv
 
 def get_manual_average_beta(position):
-    print(position.symbol)
 
     if position.risk_free == False:
-        print("Not risk free")
 
         columns = [
                 Csv.CsvColumn(name = "Symbol", is_row_identifier = True),
@@ -29,8 +27,6 @@ def get_manual_average_beta(position):
 
         manual_beta = manual_beta_csv.find_by_id(position.symbol)["Beta"]
 
-        print("Retrieved %s" % manual_beta)
-
         if manual_beta == -9001:
             manual_beta = None
         else:
@@ -43,7 +39,6 @@ def get_manual_average_beta(position):
         manual_beta = float(0)
 
     position.manual_average_beta = manual_beta
-#    input()
 
     return(0)
 
@@ -487,7 +482,7 @@ def print_overview(xl_workbook, sheetname, beta_sheets):
 
 
 def print_xlsx(positions, filename_suffix = None):
-    filename = "Z-Report-Beta"
+    filename = "Beta"
     if filename_suffix:
         filename += filename_suffix
     filename += ".xlsx"

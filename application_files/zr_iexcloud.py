@@ -1,5 +1,6 @@
 import zr_io as Io
 import zr_config as Config
+import zr_calendar as Calendar
 
 def is_prod(api_key):
     if api_key.startswith("Tsk"):
@@ -12,7 +13,6 @@ def is_prod(api_key):
         Io.error("Unknown api key %s" % api_key)
 
 def get_api_key():
-    #set iexcloud api variables
     api_key = Config.get_api_key("iexcloud")
     if not is_prod(api_key):
         if not (Io.yes_no("Continue with sandbox iexcloud key?")):
@@ -20,6 +20,7 @@ def get_api_key():
     return(api_key)
 
 def get_api_request(symbol, date, api_key = None):
+    date = Calendar.get_trading_date(date)
     if api_key == None:
         api_key = get_api_key()
     if is_prod(api_key):

@@ -1,7 +1,7 @@
 import zl_investments as Investments
 import zk_beta as Beta
 import zr_financial_instruments as Instruments
-import zr_db
+import zr_db as Db
 
 def main(investments = None):
     all_positions = []
@@ -25,20 +25,28 @@ def main(investments = None):
             if not added_quantity:
                 brokerage_positions.append(Instruments.StockPosition(new_position.symbol, new_position.quantity, last_price = new_position.last_price))
 
-    zr_db.sync_history(brokerage_positions, "stock_shares")
+    Db.sync_history(brokerage_positions, "stock_shares")
     Beta.load_portfolio_betas(brokerage_positions)
 
     for position in brokerage_positions:
         all_positions.append(position)
     Beta.print_xlsx(all_positions, "-Brokers")
 
+    #get commodities rolled in
     if investments.crypto != None:
         for c in investments.crypto:
-            zr_db.sync_history([c.emulated_stock], "crypto")
+            Db.sync_history([c.emulated_stock], "crypto")
             Beta.load_portfolio_betas([c.emulated_stock])
             all_positions.append(c.emulated_stock)
 
-    #include metals with commodities here. later.
+    metals = []
+    if investments.metals != None:
+        Db.sync_history(investments.metals, "metals")
+        for metal in investments.metals:
+            metals.append(metal.emulated_stock)
+        Beta.load_portfolio_betas(metals)
+        for metal in metals:
+            all_positions.append(metal)
 
     Beta.print_xlsx(all_positions, "-Brokers-and-Commodities")
 
@@ -47,7 +55,6 @@ def main(investments = None):
         t = investments.treasuries
         all_positions.append(Instruments.StockPosition(t.symbol, t.quantity, emulated = True, risk_free = True, last_price = t.last_price, description = t.description))
         Beta.print_xlsx(all_positions, "-All")
-
 
     exit(0)
 

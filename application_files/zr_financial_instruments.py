@@ -138,3 +138,21 @@ class CryptoCurrency():
         change = float(change)
         self.balance += change
         self.emulated_stock.add_quantity(change)
+
+
+class Metal():
+    def __init__(self, symbol, description, quantity, multiplier, last_price = None):
+        self.symbol = symbol
+        self.description = description
+        self.quantity = quantity * multiplier
+        if last_price == None:
+            #pull live prices from yahoo finance futures
+            #if no price was provided
+            if symbol == "XAG-USD":
+                self.last_price = float(y_stock_info.get_live_price("SI=F"))
+            elif symbol == "XAU-USD":
+                self.last_price = float(y_stock_info.get_live_price("GC=F"))
+        else:
+            self.last_price = last_price
+
+        self.emulated_stock = StockPosition(self.symbol, self.quantity, emulated = True, last_price = self.last_price, description = self.description)

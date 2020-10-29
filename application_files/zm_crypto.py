@@ -73,7 +73,12 @@ def main():
             crypto.add_balance(get_balance(crypto.currency, address))
             sleep(.5)
 
-    return(crypto_list)
+    return_list = []
+    for crypto in crypto_list:
+        if crypto.balance > 0:
+            return_list.append(crypto)
+
+    return(return_list)
 
 if __name__ == "__main__":
     main()

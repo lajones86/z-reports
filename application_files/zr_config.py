@@ -67,6 +67,8 @@ def get_path(key):
             "electrum_ltc_wallets" : os.path.join(os.environ.get("USERPROFILE"), r"Desktop\Crypto\electrum-ltc_data\wallets"),
             "electrum_btc_wallets" : os.path.join(os.environ.get("APPDATA"), r"Electrum\wallets"),
             "mycrypto_eth_wallets" : os.path.join(os.environ.get("APPDATA"), r"MyCrypto\Local Storage\leveldb"),
+            "metals_csv" : os.path.join(environment("assets_dir"), "metals.csv"),
+            "ex_rates_dir" : os.path.join(environment("data_dir"), r"ex_rates"),
             }
 
     return(get_public("paths", key, defaults))
@@ -74,7 +76,7 @@ def get_path(key):
 
 def get_sqlite(key):
     defaults = {
-            "history_rebuild_days" : 45,
+            "history_rebuild_days" : 35,
             }
 
     return(get_public("sqlite", key, defaults))
