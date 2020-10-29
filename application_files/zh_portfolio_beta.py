@@ -1,27 +1,53 @@
-import zm_fidelity as Fidelity
-import zm_physical as Physical
-import zk_beta
+import zl_investments as Investments
+import zk_beta as Beta
+import zr_financial_instruments as Instruments
 import zr_db
 
-def main():
+def main(investments = None):
     all_positions = []
 
-    fidelity_account = Fidelity.get_account()
-    physical_commodities = Physical.get_positions()
+    if investments == None:
+        investments = Investments.get_investments()
+    else:
+        investments = investments
 
-    for position in fidelity_account.positions:
+    #do brokerage positions
+    brokerage_positions = []
+
+    for brokerage_account in investments.brokerage_accounts:
+        for new_position in brokerage_account.stock_positions:
+            added_quantity = False
+            for existing_position in brokerage_positions:
+                if existing_position.symbol == new_position.symbol:
+                    existing_position.add_quantity(new_position.quantity)
+                    added_quantity = True
+                    break
+            if not added_quantity:
+                brokerage_positions.append(Instruments.StockPosition(new_position.symbol, new_position.quantity, last_price = new_position.last_price))
+
+    zr_db.sync_history(brokerage_positions, "stock_shares")
+    Beta.load_portfolio_betas(brokerage_positions)
+
+    for position in brokerage_positions:
         all_positions.append(position)
+    Beta.print_xlsx(all_positions, "-Brokers")
 
-    for position in physical_commodities:
-        all_positions.append(position.emulated_stock)
+    if investments.crypto != None:
+        for c in investments.crypto:
+            zr_db.sync_history([c.emulated_stock], "crypto")
+            Beta.load_portfolio_betas([c.emulated_stock])
+            all_positions.append(c.emulated_stock)
 
-    zr_db.sync_sqlite(all_positions)
+    #include metals with commodities here. later.
 
-    zk_beta.load_portfolio_betas(all_positions)
+    Beta.print_xlsx(all_positions, "-Brokers-and-Commodities")
 
-    zk_beta.print_xlsx(all_positions, "-All")
+    #include treasury bonds
+    if investments.treasuries != None:
+        t = investments.treasuries
+        all_positions.append(Instruments.StockPosition(t.symbol, t.quantity, emulated = True, risk_free = True, last_price = t.last_price, description = t.description))
+        Beta.print_xlsx(all_positions, "-All")
 
-    zk_beta.print_xlsx(fidelity_account.positions, "-Brokerages")
 
     exit(0)
 

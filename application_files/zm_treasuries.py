@@ -1,10 +1,12 @@
 import os
 import re
 import mechanicalsoup
+from time import sleep
 
 import zr_config
 import zt_html
 import zr_financial_instruments as Instruments
+import zr_io as Io
 
 def get_treasuries():
     treasuries = []
@@ -34,7 +36,17 @@ def get_treasuries():
 
             #open treasury site and submit variables
             browser = mechanicalsoup.StatefulBrowser()
-            browser.open("https://www.treasurydirect.gov/BC/SBCPrice")
+            try_count = 0
+            while try_count < 10:
+                try:
+                    sleep(1)
+                    browser.open("https://www.treasurydirect.gov/BC/SBCPrice")
+                    break
+                except:
+                    if try_count == 10:
+                        Io.error("Treasury site not responding. Aborting.")
+                    print("Treasury site not responding. Retrying.")
+                    try_count += 1
             browser.select_form('form[action="https://www.treasurydirect.gov/BC/SBCPrice"]')
             for variable in variables:
                 browser[variable.name] = variable.value
@@ -47,6 +59,15 @@ def get_treasuries():
 
     return(treasuries)
 
+def get_emulated_stock():
+    treasuries = get_treasuries()
+    emulated_stock = Instruments.StockPosition("T-Bond", 1, emulated = True, risk_free = True, last_price = 0, description = "T-Bond")
+    for treasury in treasuries:
+        emulated_stock.modify_price(treasury.value)
+    return(emulated_stock)
+
 if __name__ == "__main__":
     for i in get_treasuries():
         print(i.serial, i.series, i.denomination, i.issue_date, i.next_accrual, i.maturity_date, i.issue_price, i.interest, i.rate, i.value)
+    x = get_emulated_stock()
+    print(x.symbol, x.quantity, x.emulated, x.risk_free, x.last_price, x.description, x.equity)

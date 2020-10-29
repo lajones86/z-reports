@@ -1,6 +1,6 @@
 def enter_text(text):
     print(text)
-    input("Press Enter key to exit.")
+    input("Press Enter key.")
     return(0)
 
 def nostop(text):

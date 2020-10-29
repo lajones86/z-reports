@@ -11,9 +11,9 @@ def environment(element):
     local_environment = {
             "reports_dir" : reports_dir,
             "data_dir" : os.path.join(money_dir, "script_data"),
-            "reports_csv_dir" : os.path.join(reports_dir, "z_csv"),
-            "investments_dir" : os.path.join(money_dir, "investments"),
+            "assets_dir" : os.path.join(money_dir, "assets")
             }
+    
     return(local_environment[element])
 
 def get_universal(config_file, query_section, query_key, defaults):
@@ -60,11 +60,13 @@ def get_public(section, key, defaults):
 
 def get_path(key):
     defaults = {
-            "history" : os.path.join(environment("data_dir"), "history"),
-            "treasuries" : os.path.join(environment("investments_dir"), "treasuries.html"),
-            "physical_commodities" : os.path.join(environment("investments_dir"), "physical_commodities.csv"),
+            "treasuries" : os.path.join(environment("assets_dir"), "treasuries.html"),
             "securities_info" : os.path.join(environment("data_dir"), "securities_info.csv"),
-            "reports_dir" : environment("reports_dir")
+            "reports_dir" : environment("reports_dir"),
+            "history_db" : os.path.join(environment("data_dir"), r"history.db"),
+            "electrum_ltc_wallets" : os.path.join(os.environ.get("USERPROFILE"), r"Desktop\Crypto\electrum-ltc_data\wallets"),
+            "electrum_btc_wallets" : os.path.join(os.environ.get("APPDATA"), r"Electrum\wallets"),
+            "mycrypto_eth_wallets" : os.path.join(os.environ.get("APPDATA"), r"MyCrypto\Local Storage\leveldb"),
             }
 
     return(get_public("paths", key, defaults))
@@ -72,9 +74,7 @@ def get_path(key):
 
 def get_sqlite(key):
     defaults = {
-            "history" : os.path.join(environment("data_dir"), r"history\^00000-history.db"),
-            "history_rebuild_days" : 28,
-            "history_pull_years" : 10,
+            "history_rebuild_days" : 45,
             }
 
     return(get_public("sqlite", key, defaults))
@@ -82,16 +82,31 @@ def get_sqlite(key):
 
 def get_beta(key):
     defaults = {
-            "benchmark" : "^GSPC",
+            "benchmark" : "SPY",
             "min_years" : 1,
             "max_years" : 3,
             "subyear_interval" : 4,
-            # adj_close is adjusted for dividends
-            #"close_price_col" : "close",
-            "close_price_col" : "adj_close"
+            "manual_averages" : os.path.join(environment("data_dir"), r"manual_average_beta.csv"),
             }
 
     return(get_public("beta", key, defaults))
+
+
+def get_api_key(key):
+    defaults = {
+            "metals-api" : "",
+            "iexcloud" : ""
+            }
+    return(get_public("api_keys", key, defaults))
+
+
+def get_yahoo(key):
+    defaults = {
+            "use_yahoo" : "False",
+            "download_dir" : os.path.join(environment("data_dir"), "yahoo"),
+            "benchmark" : "^GSPC",
+            }
+    return(get_public("yahoo", key, defaults))
 
 if __name__ == "__main__":
     zr_io.message("This module is not designed to be run on its own.")
