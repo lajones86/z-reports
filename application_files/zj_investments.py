@@ -1,64 +1,26 @@
-import zm_physical as Physical
-import zm_treasuries as Treasuries
-import zm_fidelity as Fidelity
-
 import zr_financial_concepts as Concepts
+import zm_fidelity as Fidelity
+import zm_treasuries as Treasuries
+import zm_crypto as Crypto
+import zm_metals as Metals
+import zr_io as Io
 import zr_excel as Excel
 import zr_config as Config
 
-
-import xlsxwriter
 import os
+import xlsxwriter
 
-def process_brokerage_account(brokerage_account):
-    print("Processing brokerage account %s" % brokerage_account.name)
-    total_equity = float(0)
-    for position in brokerage_account.positions:
-        total_equity += position.equity
-    total_equity += brokerage_account.cash_position
-    return(Concepts.AccountSummary(brokerage_account.name, total_equity))
+def get_brokerages():
+    fidelity_account = Fidelity.get_account()
+    return([fidelity_account])
 
-
-def process_commodities(commodities_list):
-    print("Processing commodities.")
-    tracking_commodities = []
-    for commodity in commodities_list:
-        try:
-            #tracking commodities will have a symbol to track
-            commodity.symbol
-            tracking_commodities.append(Concepts.AccountSummary(commodity.description, commodity.emulated_stock.equity))
-        except AttributeError:
-            pass
-    return(tracking_commodities)
-
-
-def process_treasuries():
-    print("Processing treasury bonds.")
-    total_value = float(0)
-    for bond in Treasuries.get_treasuries():
-        total_value += bond.value
-    return(Concepts.AccountSummary("Treasury Bonds", total_value))
-
-
-
-def compile_investments():
-    print("Aggregating investments.")
-
-    brokerage_accounts = Concepts.SummaryCollection("Brokerage Accounts")
-
-    commodities = Concepts.SummaryCollection("Commodities")
-
-    other = Concepts.SummaryCollection("Other")
-
-    brokerage_accounts.add_summary(process_brokerage_account(Fidelity.get_account()))
-
-    for commodity in process_commodities(Physical.get_positions()):
-        commodities.add_summary(commodity)
-
-    other.add_summary(process_treasuries())
-
-    return[brokerage_accounts, commodities, other]
-
+def get_investments():
+    investments = Concepts.Investments()
+    investments.brokerage_accounts = get_brokerages()
+    investments.treasuries = Treasuries.get_emulated_stock()
+    investments.crypto = Crypto.main()
+    investments.metals = Metals.main()
+    return(investments)
 
 def write_worksheet(xl_workbook, investments):
     #excel formatting
@@ -77,6 +39,48 @@ def write_worksheet(xl_workbook, investments):
     total_label = len(section_headers) + 1
     total_cell = total_label + 1
     subtotal_cells = []
+
+    #convert investments to summarycollection objects
+    summaries_list = []
+
+    #brokerage accounts
+    brokerage_summaries = Concepts.SummaryCollection("Brokerage Accounts")
+    for brokerage_account in investments.brokerage_accounts:
+        new_brokerage_summary = Concepts.AccountSummary(brokerage_account.name, 0)
+        for position in brokerage_account.stock_positions:
+            new_brokerage_summary.balance += position.equity
+        new_brokerage_summary.balance += brokerage_account.cash_position
+        brokerage_summaries.add_summary(new_brokerage_summary)
+
+    summaries_list.append(brokerage_summaries)
+
+    #crypto
+    crypto_summaries = Concepts.SummaryCollection("Cryptocurrency")
+    for crypto in investments.crypto:
+        new_crypto_summary = Concepts.AccountSummary(crypto.description, crypto.emulated_stock.equity)
+        crypto_summaries.add_summary(new_crypto_summary)
+
+    summaries_list.append(crypto_summaries)
+
+    #metals
+    metal_summaries = Concepts.SummaryCollection("Metals")
+    for metal in investments.metals:
+        new_metal_summary = Concepts.AccountSummary(metal.description, metal.emulated_stock.equity)
+        metal_summaries.add_summary(new_metal_summary)
+
+    summaries_list.append(metal_summaries)
+
+    #bonds
+    bond_summaries = Concepts.SummaryCollection("Bonds")
+    bond_summaries.add_summary(Concepts.AccountSummary("Treasury Bonds", investments.treasuries.equity))
+
+    summaries_list.append(bond_summaries)
+
+    
+    #reassign the variable because i'm shimming new objects into old code
+    #it's a little sloppy, but the old code is already debugged
+    investments = summaries_list
+
 
     for investment in investments:
         xl_worksheet.merge_range("A%s:%s%s" % (str(xl_row + 1), Excel.get_letter(len(section_headers) - 1), str(xl_row + 1)), investment.description, xl_header)
@@ -120,15 +124,16 @@ def write_worksheet(xl_workbook, investments):
     for cell in subtotal_cells[1::]:
         total_formula += "+%s%s" % (Excel.get_letter(cell[0]), cell[1])
     xl_worksheet.write_formula(0, total_cell, "=%s" % total_formula)
-        
 
-def main():
-    investments = compile_investments()
-    xl_wb_path = os.path.join(Config.get_path("reports_dir"), "Z-Report-Investments.xlsx")
+
+def main(investments = None):
+    if investments == None:
+        investments = get_investments()
+    xl_wb_path = os.path.join(Config.get_path("reports_dir"), "Investments.xlsx")
     xl_workbook = xlsxwriter.Workbook(xl_wb_path)
     write_worksheet(xl_workbook, investments)
     Excel.save_workbook(xl_workbook, xl_wb_path)
-
+    return(investments)
 
 if __name__ == "__main__":
     main()

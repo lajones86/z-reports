@@ -126,6 +126,14 @@ class TreasuryBond():
 class CryptoCurrency():
     def __init__(self, currency, addresses):
         self.currency = currency
+        if currency.upper() == "BTC":
+            self.description = "Bitcoin"
+        elif currency.upper() == "LTC":
+            self.description = "Litecoin"
+        elif currency.upper() == "ETH":
+            self.description = "Ethereum"
+        else:
+            self.description = currency
         self.addresses = addresses
         self.balance = float(0)
 
