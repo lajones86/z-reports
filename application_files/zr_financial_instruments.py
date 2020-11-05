@@ -151,6 +151,10 @@ class CryptoCurrency():
 class Metal():
     def __init__(self, symbol, description, quantity, multiplier, last_price = None):
         self.symbol = symbol
+        if symbol == "XAG-USD":
+            emulate_symbol = "SLV"
+        elif symbol == "XAU-USD":
+            emulate_symbol = "GLD"
         self.description = description
         self.quantity = quantity * multiplier
         if last_price == None:
@@ -163,4 +167,4 @@ class Metal():
         else:
             self.last_price = last_price
 
-        self.emulated_stock = StockPosition(self.symbol, self.quantity, emulated = True, last_price = self.last_price, description = self.description)
+        self.emulated_stock = StockPosition(emulate_symbol, self.quantity, emulated = True, last_price = self.last_price, description = self.description)

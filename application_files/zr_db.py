@@ -156,6 +156,12 @@ def sync_stock_history(positions):
 
 
 def sync_metals_history(metals):
+    #can't find good metal information. skip this for now and just dump to yahoo data for etfs
+    metal_stocks = []
+    for metal in metals:
+        metal_stocks.append(metal.emulated_stock)
+    sync_stock_history(metal_stocks)
+
     dates = get_dates_list()
     history_db = get_history_db_cursor()
 
