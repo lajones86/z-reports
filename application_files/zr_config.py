@@ -11,7 +11,9 @@ def environment(element):
     local_environment = {
             "reports_dir" : reports_dir,
             "data_dir" : os.path.join(money_dir, "script_data"),
-            "assets_dir" : os.path.join(money_dir, "assets")
+            "assets_dir" : os.path.join(money_dir, "assets"),
+            "cash_flows_dir" : os.path.join(money_dir, "cash_flows"),
+            "money_dir" : money_dir
             }
     
     return(local_environment[element])
@@ -69,6 +71,9 @@ def get_path(key):
             "mycrypto_eth_wallets" : os.path.join(os.environ.get("APPDATA"), r"MyCrypto\Local Storage\leveldb"),
             "metals_csv" : os.path.join(environment("assets_dir"), "metals.csv"),
             "ex_rates_dir" : os.path.join(environment("data_dir"), r"ex_rates"),
+            "accounts_csv" : os.path.join(environment("cash_flows_dir"), r"accounts.csv"),
+            "money_dir" : environment("money_dir"),
+            "ledger_archive_dir" : os.path.join(environment("cash_flows_dir"), r"archive"),
             }
 
     return(get_public("paths", key, defaults))

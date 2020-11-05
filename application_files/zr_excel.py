@@ -35,3 +35,36 @@ class BetaSheet:
         self.header_dict = header_dict
         self.symbol_dict = symbol_dict
 
+
+class LedgerTab():
+    def __init__(self, name, accounts):
+        self.name = name
+        self.checking = []
+        self.savings = []
+        self.credit_cards = []
+        self.xl_worksheet = None
+        self.summary_start_col = None
+        self.cc_total_cell = None
+        self.cc_total_adj_cell = None
+        self.checking_total_cell = None
+        self.checking_total_adj_cell = None
+        self.savings_total_cell = None
+        self.savings_total_adj_cell = None
+
+        for account in accounts:
+            if account.account_type == "Checking":
+                self.checking.append(account)
+            elif account.account_type == "Savings":
+                self.savings.append(account)
+            elif account.account_type == "Credit Card":
+                self.credit_cards.append(account)
+            else:
+                Io.error("Unknown account type %s" % account.account_type)
+
+
+class InvestmentsTab:
+    def __init__(self):
+        self.broker_total_cell = None
+        self.crypto_total_cell = None
+        self.metal_total_cell = None
+        self.bond_total_cell = None

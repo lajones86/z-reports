@@ -136,8 +136,6 @@ def sync_stock_history(positions):
     for position in positions:
         print("Processing database entries for %s" % position.symbol)
         missing_dates = get_missing_dates(history_db, position.symbol, dates)
-        if len(missing_dates) > 0 and Config.get_yahoo("use_yahoo") == "True":
-            Yahoo.download(position.symbol, missing_dates[0], missing_dates[-1])
         for date in missing_dates:
             if Config.get_yahoo("use_yahoo") == "False":
                 symbol = position.symbol

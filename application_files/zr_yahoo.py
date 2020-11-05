@@ -34,15 +34,16 @@ def get_url_timestamp(date):
             return(fixed_timestamp)
 
 
-def get_csv_url(symbol, start_date, end_date):
+def get_csv_url(symbol, date):
+    start_date = (datetime.strptime(date, "%Y-%m-%d") - relativedelta(days = 1)).strftime("%Y-%m-%d")
     start_date = get_url_timestamp(start_date)
+    end_date = (datetime.strptime(date, "%Y-%m-%d") + relativedelta(days = 1)).strftime("%Y-%m-%d")
     end_date = get_url_timestamp(end_date)
-
-    yf_csv = r"https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1mo&events=history" % (symbol, start_date, end_date)
+    yf_csv = r"https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history" % (symbol, start_date, end_date)
     return(yf_csv)
 
 
-def download(symbol, start_date, end_date, destination_path = None, is_fix_attempt = None):
+def download(symbol, date, destination_path = None):
     symbol = symbol.upper()
 
     db_start_date = Db.get_start_date(symbol)
@@ -54,15 +55,12 @@ def download(symbol, start_date, end_date, destination_path = None, is_fix_attem
     else:
         destination_path = destination_path
 
-    csv_url = get_csv_url(symbol, start_date, end_date)
+    csv_url = get_csv_url(symbol, date)
    
     try:
         urllib.request.urlretrieve(csv_url, destination_path)
     except urllib.error.HTTPError:
-        if is_fix_attempt != True:
-            Io.error("Failed to download history for %s from %s to %s" % (symbol, start_date, end_date))
-        else:
-            return(False)
+        return(False)
 
     return(True)
 
@@ -82,15 +80,13 @@ def get_adj_close(path, date):
 
 def request(symbol, date):
     csv_path = get_filepath(symbol)
-    if os.path.isfile(csv_path):
-        adj_close = get_adj_close(csv_path, date)
-    else:
-        adj_close = "null"
+    date = Calendar.get_trading_date(date)
+    adj_close = "null"
 
     if adj_close != None:
         if "null" in adj_close:
             csv_path = get_filepath(symbol, prepend = "retry-")
-            if download(symbol, date, date, csv_path, is_fix_attempt = True) == False:
+            if download(symbol, date, csv_path) == False:
                 print("Failed to get data from yahoo. Falling back to iexcloud.")
                 iexcloud_request = Iexcloud.get_api_request(symbol, date)
                 iexcloud_response = Api.make_api_request(iexcloud_request)
@@ -105,7 +101,7 @@ def request(symbol, date):
                         if str(adj_close) == "":
                             return_empty = True
             else:
-                adj_close = get_adj_close(csv_path, date)
+                    adj_close = get_adj_close(csv_path, date)
     
     return_empty = False
     if adj_close == None:

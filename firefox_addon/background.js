@@ -41,7 +41,7 @@ function handleMessage(request, sender, sendResponse) {
 
     //add new sites here
     if (urlHost.endsWith("fidelity.com")) {
-        if (pageUrl.includes("portfolio#positions")) {
+        if (pageUrl.includes("portfolio#positions/Z")) {
             fileName += "fidelity";
         }
         else {
@@ -49,6 +49,25 @@ function handleMessage(request, sender, sendResponse) {
             fileName = "";
         }
     }
+    else if (urlHost.endsWith("webull.com")) {
+        if (pageUrl.includes("/account")) {
+            fileName += "webull";
+        }
+        else {
+            zNotify("Download aborted", "Unable to verify webull portfolio positions url");
+            fileName = "";
+        }
+    }
+    else if (urlHost.endsWith("ucbonline.com")) {
+        if (pageUrl.includes("Account/Detail")) {
+            fileName += "ucb";
+        }
+        else {
+            zNotify("Download aborted", "Unable to verify ucb loan url");
+            fileName = "";
+        }
+    }
+
 
     else {
         zNotify("Unknown host", urlHost);

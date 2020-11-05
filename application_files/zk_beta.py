@@ -246,10 +246,23 @@ def print_beta_sheet(positions, xl_workbook, sheetname, master_sheet):
         else:
             if beta_start and not beta_end:
                 beta_end = Excel.get_letter(headers.index(header) - 1)
-        xl_worksheet.write(xl_row, xl_col, output_cell, xl_header)
+        xl_worksheet.write(xl_row, xl_col, output_cell.replace(" Month", "M").replace(" (Monthly)", ""), xl_header)
+
+        xl_worksheet.set_column(xl_col, xl_col, len(output_cell.replace(" Month", "M").replace(" (Monthly)", "")) * 1.2)
+
         xl_col += 1
 
     totals_row = len(positions) + 2
+
+    #set length of symbols row based on longest symbol
+    longest_symbol = 6
+    for position in positions:
+        element_to_check = position.symbol
+        if position.emulated == True and position.description != None:
+            element_to_check = position.description
+        if len(element_to_check) > longest_symbol:
+            longest_symbol = len(element_to_check)
+    xl_worksheet.set_column(0, 0, longest_symbol * 1.2)
 
     #write positions to sheet and do math
     #write symbol dictionary for BetaSheet object
@@ -399,16 +412,33 @@ def print_overview(xl_workbook, sheetname, beta_sheets):
         headers = [category, "Equity", "Beta", "Weight", "Weighted Beta"]
         for header in headers:
             xl_worksheet.write(xl_row, xl_col, header, xl_header)
+            if header == category:
+                pass
+            elif header == "Equity":
+                xl_worksheet.set_column(xl_col, xl_col, 12)
+            else:
+                col_width_base = len(header)
+                if col_width_base < 6:
+                    col_width_base = 6
+                xl_worksheet.set_column(xl_col, xl_col, col_width_base * 1.2)
+
             xl_col += 1
 
         xl_row += 1
         xl_col = starting_col
 
         #write info
+        #and set category column width
+        longest_category = len(category)
         category_sheets = []
         for sheet in beta_sheets:
             if category in sheet.sheetname:
                 category_sheets.append(sheet)
+                cat_item_name = (sheet.sheetname).replace("%s Beta - " % category, "")
+                if len(cat_item_name) > longest_category:                    
+                    longest_category = len(cat_item_name)
+
+        xl_worksheet.set_column(xl_col, xl_col, longest_category * 1.2)
 
         totals_row = len(category_sheets) + 2
 

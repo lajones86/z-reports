@@ -40,6 +40,19 @@ import csv
 import os
 from copy import deepcopy
 
+def write_empty(path, columns, overwrite = None):
+    if overwrite != True:
+        if os.path.isfile(path):
+            return(False)
+
+    output_string = ""
+    for column in columns:
+        output_string += column.name + ","
+
+    with open(path, "w") as f:
+        f.write(output_string.rstrip(","))
+    print("Wrote to %s" % path)
+
 
 class CsvColumnMap:
     def __init__(self, provided_columns = None):

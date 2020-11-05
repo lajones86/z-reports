@@ -23,6 +23,10 @@ def get_investments():
     return(investments)
 
 def write_worksheet(xl_workbook, investments):
+
+    tab = Excel.InvestmentsTab()
+    longest_left = 5
+
     #excel formatting
     xl_header = xl_workbook.add_format({"bold" : True, "underline" : True, "center_across" : True})
     xl_symbol = xl_workbook.add_format({"bold" : True, "italic" : True})
@@ -94,11 +98,13 @@ def write_worksheet(xl_workbook, investments):
         xl_row += 1
         start_row = xl_row + 1
         for summary in investment.summaries_list:
+            if len(summary.name) > longest_left:
+                longest_left = len(summary.name)
             for header in section_headers:
                 if header == "Asset":
                     xl_worksheet.write(xl_row, xl_col, summary.name, xl_symbol)
                 elif header == "Equity":
-                    xl_worksheet.write(xl_row, xl_col, summary.balance, xl_normal)
+                    xl_worksheet.write(xl_row, xl_col, round(summary.balance, 2), xl_normal)
                 elif header == "Weight":
                     xl_worksheet.write_formula(xl_row, xl_col, "=%s%s/%s%s" %
                             (Excel.get_letter(xl_col - 1), xl_row + 1, Excel.get_letter(total_cell), 1))
@@ -113,8 +119,19 @@ def write_worksheet(xl_workbook, investments):
             xl_col += 1
             xl_worksheet.write_formula(xl_row, xl_col, "=SUM(%s%s:%s%s)" %
                     (Excel.get_letter(xl_col), start_row, Excel.get_letter(xl_col), end_row))
+
             if header == "Equity":
                 subtotal_cells.append([xl_col, end_row + 1])
+
+        tab_total_cell = "%s%s" % (Excel.get_letter(xl_col - 1), str(xl_row + 1))
+        if investment.description == "Brokerage Accounts":
+            tab.broker_total_cell = tab_total_cell
+        elif investment.description == "Cryptocurrency":
+            tab.crypto_total_cell = tab_total_cell
+        elif investment.description == "Metals":
+            tab.metal_total_cell = tab_total_cell
+        elif investment.description == "Bonds":
+            tab.bond_total_cell = tab_total_cell
 
         xl_row += 2
         xl_col = 0
@@ -124,6 +141,12 @@ def write_worksheet(xl_workbook, investments):
     for cell in subtotal_cells[1::]:
         total_formula += "+%s%s" % (Excel.get_letter(cell[0]), cell[1])
     xl_worksheet.write_formula(0, total_cell, "=%s" % total_formula)
+
+    xl_worksheet.set_column(0, 0, longest_left)
+    xl_worksheet.set_column(1, 1, 12)
+    xl_worksheet.set_column(5, 5, 12)
+
+    return(tab)
 
 
 def main(investments = None):
