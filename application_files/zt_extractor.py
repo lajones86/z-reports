@@ -39,4 +39,6 @@ def get_extractor_file(identifier, download_dirs = None):
     for extractor_file in extractor_files:
         if last_timestamp in extractor_file:
             return(extractor_file)
+        else:
+            os.remove(extractor_file)
     return(None)
