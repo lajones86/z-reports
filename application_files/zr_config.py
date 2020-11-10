@@ -87,6 +87,14 @@ def get_sqlite(key):
     return(get_public("sqlite", key, defaults))
 
 
+def get_ledger(key):
+    defaults = {
+            "archive_months" : 12,
+            }
+
+    return(get_public("ledger", key, defaults))
+
+
 def get_beta(key):
     defaults = {
             "benchmark" : "SPY",

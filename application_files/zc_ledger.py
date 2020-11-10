@@ -359,9 +359,20 @@ def archive_ledger():
         source_path = ReadLedger.get_ledger_path(prior = True)
         if not os.path.isfile(source_path):
             return(False)
+    archive_dir = Config.get_path("ledger_archive_dir")
     destination_name = os.path.split(source_path)[1]
     destination_name = os.path.splitext(destination_name)[0] + "-" + datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".xlsx"
-    destination_path = os.path.join(Config.get_path("ledger_archive_dir"), destination_name)
+    destination_path = os.path.join(archive_dir, destination_name)
+
+    #purge old ledgers
+    archive_months = Config.get_ledger("archive_months")
+    earliest_date = (datetime.now().date() - relativedelta(months = archive_months))
+    earliest_ledger = earliest_date.strftime("%Y-%m")
+    for i in os.listdir(archive_dir):
+        if i[0:7] < earliest_ledger:
+            print("Removing archive %s from %s" % (i, archive_dir))
+            os.remove(os.path.join(archive_dir, i))
+
     moved = False
     while not moved:
         try:
