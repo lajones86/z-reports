@@ -45,7 +45,7 @@ def write_overview_tab(xl_workbook, xl_worksheet, ledger_tabs, investments_tab, 
                 savings_formula += "+'%s'!%s" % (tab.name, account.balance_cell)
                 savings_adj_formula += "+'%s'!%s" % (tab.name, account.balance_adj_cell)
 
-    xl_worksheet.merge_range("A1:D1", "Stuff", xl_section)
+    xl_worksheet.merge_range("A1:D1", "Summary", xl_section)
     xl_worksheet.write(1, 0, "Item", xl_header)
     xl_worksheet.write(1, 1, "Balance/Equity", xl_header)
     xl_worksheet.write(1, 2, "Pending Adj", xl_header)
