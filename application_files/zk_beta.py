@@ -3,6 +3,8 @@ import numpy
 import xlsxwriter
 import os
 import re
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 import zr_excel as Excel
 import zr_financial_instruments as Instruments
@@ -115,6 +117,37 @@ def get_security_returns_list(symbol, months):
     db_conn.close()
     return(return_list)
 
+
+def get_symbol_max(symbol):
+    db_conn = sqlite3.connect(Config.get_path("history_db"))
+    db_conn.isolation_level = None
+    cursor = db_conn.cursor()
+
+    symbol_dates = []
+    for record in (cursor.execute("SELECT * FROM '%s' where adj_close != -9001;" % (str(symbol))).fetchall()):
+        symbol_dates.append(record[0])
+    db_conn.close()
+
+    last_date = datetime.now().replace(day = 1).strftime("%Y-%m-%d")
+
+    if symbol_dates[-1] != last_date:
+        Io.error("Last date for %s should be %s but is %s" % (symbol, last_date, symbol_dates[-1]))
+
+    usable_dates = []
+
+    for date in symbol_dates[::-1]:
+        if date == last_date:
+            usable_dates.append(date)
+            last_date = (datetime.strptime(last_date, "%Y-%m-%d") - relativedelta(months = 1)).strftime("%Y-%m-%d")
+        else:
+            break
+    
+    if len(usable_dates) == 0 or len(usable_dates) == 1:
+        Io.error("No usable date range for %s" % symbol)
+
+    return(len(usable_dates))
+
+
 def load_portfolio_betas(positions):
     sub_year_interval_months = Config.get_beta("subyear_interval")
     max_beta_years = Config.get_beta("max_years")
@@ -142,6 +175,11 @@ def load_portfolio_betas(positions):
             #adjusting counts by 1 as when checking benchmark
             if symbol_count < (symbol_max + 1):
                 symbol_max = (symbol_count - 1)
+                print("Symbol records insufficient for desired beta span. Setting maximum months to %s for symbol." % symbol_max)
+
+            true_symbol_max = get_symbol_max(position.symbol)
+            if true_symbol_max < (symbol_max + 1):
+                symbol_max = (true_symbol_max - 1)
                 print("Symbol records insufficient for desired beta span. Setting maximum months to %s for symbol." % symbol_max)
 
             #check here for our sub-year breakdown
