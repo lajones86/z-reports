@@ -182,42 +182,48 @@ def load_portfolio_betas(positions):
                 symbol_max = (true_symbol_max - 1)
                 print("Symbol records insufficient for desired beta span. Setting maximum months to %s for symbol." % symbol_max)
 
-            #check here for our sub-year breakdown
-            #we're assuming max_beta_years has been set to at least one
-            #if not, you're just trying to break things
-            for months in range(1, 12):
-                if months > symbol_max:
-                    break
-                else:
+            if symbol_max >= 2:
+
+                #check here for our sub-year breakdown
+                #we're assuming max_beta_years has been set to at least one
+                #if not, you're just trying to break things
+                for months in range(1, 12):
+                    if months > symbol_max:
+                        break
+                    else:
+                        if sub_year_interval_months:
+                            if not months % sub_year_interval_months:
+                                position.add_beta(months, calc_single_security_beta(str(position.symbol), months))
+
+                #switch to breakdown by year
+                for year in range(Config.get_beta("min_years"), max_beta_years + 1):
+                    months = year * 12
+                    if months > symbol_max:
+                        break
+                    else:
+                        position.add_beta(months, calc_single_security_beta(str(position.symbol), months))
+
+                #make sure to hit max-length beta if there weren't enough records
+                #to go as long as we wanted on this position
+                max_done = False
+                #if we have less than a year of data for the symbol
+                #we check the sub-year interval to make sure it's been done
+                if symbol_max < 12:
                     if sub_year_interval_months:
-                        if not months % sub_year_interval_months:
-                            position.add_beta(months, calc_single_security_beta(str(position.symbol), months))
+                        if not symbol_max % sub_year_interval_months:
+                            max_done = True
 
-            #switch to breakdown by year
-            for year in range(Config.get_beta("min_years"), max_beta_years + 1):
-                months = year * 12
-                if months > symbol_max:
-                    break
+                #if it's at least a year, we check to see if it got
+                #hit during the year-by-year breakdown
                 else:
-                    position.add_beta(months, calc_single_security_beta(str(position.symbol), months))
-
-            #make sure to hit max-length beta if there weren't enough records
-            #to go as long as we wanted on this position
-            max_done = False
-            #if we have less than a year of data for the symbol
-            #we check the sub-year interval to make sure it's been done
-            if symbol_max < 12:
-                if sub_year_interval_months:
-                    if not symbol_max % sub_year_interval_months:
+                    if not symbol_max % 12:
                         max_done = True
+                if not max_done:
+                    position.add_beta(symbol_max, calc_single_security_beta(str(position.symbol), symbol_max))
 
-            #if it's at least a year, we check to see if it got
-            #hit during the year-by-year breakdown
             else:
-                if not symbol_max % 12:
-                    max_done = True
-            if not max_done:
-                position.add_beta(symbol_max, calc_single_security_beta(str(position.symbol), symbol_max))
+                print("Insufficient history to calculate beta.")
+            
 
     db_conn.close()
     return(0)
@@ -620,10 +626,13 @@ def symbol_lookup():
         if Db.sync_history([position], "stock_shares") == 0:
             load_portfolio_betas([position])
             beta_sum = 0.00
-            for b in position.betas[::-1]:
-                print("%s Month Beta (Monthly): %s" % (str(b.months), str(b.beta)))
-                beta_sum += b.beta
-            print("Average Monthly Beta: %s" % (str(beta_sum / len(position.betas))))
+            if len(position.betas) != 0:
+                for b in position.betas[::-1]:
+                    print("%s Month Beta (Monthly): %s" % (str(b.months), str(b.beta)))
+                    beta_sum += b.beta
+                print("Average Monthly Beta: %s" % (str(beta_sum / len(position.betas))))
+            else:
+                print("Not enough history to calculate beta.")
 
 
 if __name__ == "__main__":
