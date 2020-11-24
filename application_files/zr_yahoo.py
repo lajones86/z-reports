@@ -2,6 +2,7 @@ import urllib
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 import os
+from yahoo_fin import stock_info as y_stock_info
 
 import zr_config as Config
 import zr_io as Io
@@ -124,3 +125,7 @@ def clean():
     download_dir = Config.get_yahoo("download_dir")
     for i in os.listdir(download_dir):
         os.remove(os.path.join(download_dir, i))
+
+
+def get_live_price(symbol):
+    return(float(y_stock_info.get_live_price(symbol)))

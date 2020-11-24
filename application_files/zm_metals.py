@@ -4,6 +4,7 @@ import zr_io as Io
 import zr_financial_instruments as Instruments
 import zr_metals_api as MetalsApi
 import zr_api as Api
+import zr_yahoo as Yahoo
 
 def main():
     columns = [
@@ -31,10 +32,20 @@ def main():
     live_prices_request = MetalsApi.get_live_request(symbol_string)
     live_prices = Api.make_api_request(live_prices_request)
 
+    if live_prices["success"] == False:
+        live_prices = None
+
     return_metals = []
 
     for metal in metals:
-        last_price = float(1 / float(live_prices["rates"][metal["Symbol"].replace("-USD", "")]))
+        if live_prices != None:
+            last_price = float(1 / float(live_prices["rates"][metal["Symbol"].replace("-USD", "")]))
+        else:
+            if metal["Symbol"] == "XAG-USD":
+                symbol = "SI=F"
+            else:
+                Io.error("Unknown metal symbol %s" % metal["Symbol"])
+            last_price = Yahoo.get_live_price(symbol)
         new_metal = Instruments.Metal(metal["Symbol"], metal["Description"], metal["Quantity"], metal["Multiplier"], last_price = last_price)
         return_metals.append(new_metal)
     return(return_metals)
