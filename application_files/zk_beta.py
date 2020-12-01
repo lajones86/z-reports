@@ -128,7 +128,10 @@ def get_symbol_max(symbol):
         symbol_dates.append(record[0])
     db_conn.close()
 
-    last_date = datetime.now().replace(day = 1).strftime("%Y-%m-%d")
+    current_date = datetime.now()
+    if current_date.day == 1:
+        current_date = current_date - relativedelta(months = 1)
+    last_date = current_date.replace(day = 1).strftime("%Y-%m-%d")
 
     if symbol_dates[-1] != last_date:
         Io.error("Last date for %s should be %s but is %s" % (symbol, last_date, symbol_dates[-1]))

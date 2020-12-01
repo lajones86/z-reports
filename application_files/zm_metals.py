@@ -33,6 +33,7 @@ def main():
     live_prices = Api.make_api_request(live_prices_request)
 
     if live_prices["success"] == False:
+        print("Falling back to Yahoo futures for live metal prices.")
         live_prices = None
 
     return_metals = []
