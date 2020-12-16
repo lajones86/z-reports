@@ -58,14 +58,14 @@ def get_account(download_dirs = None):
     print("Adjusting cash position with pending activity")
     pending_activity_div = zt_html.get_by_xpath(fidelity_html,
             "//div[@class='magicgrid--total-pending-activity-link-container']",
-            min_results = 1, max_results = 1,
-            description = "Pending activity div")[0]
-
-    pending_activity_value = float((zt_html.get_by_xpath(pending_activity_div,
+            min_results = 0, max_results = 1,
+            description = "Pending activity div")
+    if len(pending_activity_div) == 1:
+        pending_activity_div = pending_activity_div[0]
+        pending_activity_value = float((zt_html.get_by_xpath(pending_activity_div,
             ".//span[@class='value']", min_results = 1, max_results = 1,
             description = "Pending activity value")[0].text).strip().replace("$", ""))
-
-    fidelity_account.cash_position += pending_activity_value
+        fidelity_account.cash_position += pending_activity_value
 
     return(fidelity_account)
 
