@@ -1,6 +1,6 @@
 {
     "name": "Z-Reports Extractor",
-    "version":  "0.5.6",
+    "version":  "0.5.6.1",
     "description":  "Pull data from websites for z-reports processing.",
     "manifest_version": 2,
 
