@@ -45,7 +45,7 @@ def get_account(download_dirs = None):
                 description = "Fidelity table symbol span"))[0]
         symbol = str(symbol_span.text).strip()
 
-        quantity = float((tr[table_map["quantity"]]).text)
+        quantity = float((tr[table_map["quantity"]]).text.replace(",", ""))
 
         if symbol.endswith("**"):
             print("Setting cash position.")
@@ -64,7 +64,7 @@ def get_account(download_dirs = None):
         pending_activity_div = pending_activity_div[0]
         pending_activity_value = float((zt_html.get_by_xpath(pending_activity_div,
             ".//span[@class='value']", min_results = 1, max_results = 1,
-            description = "Pending activity value")[0].text).strip().replace("$", ""))
+            description = "Pending activity value")[0].text).strip().replace("$", "").replace(",", ""))
         fidelity_account.cash_position += pending_activity_value
 
     return(fidelity_account)
