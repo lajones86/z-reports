@@ -41,7 +41,7 @@ function handleMessage(request, sender, sendResponse) {
 
     //add new sites here
     if (urlHost.endsWith("fidelity.com")) {
-        if (pageUrl.includes("portfolio#/positions/Z")) {
+        if (pageUrl.includes("portfolio#/positions/Z") || pageUrl.includes("portfolio#positions/Z")) {
             fileName += "fidelity";
         }
         else {
