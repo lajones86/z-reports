@@ -382,6 +382,7 @@ def archive_ledger():
             if not Io.yes_no("Failed to archive existing ledger. It might be open. Try again?"):
                 Io.error("Aborting.")
 
+    return(destination_path)
 
 
 def main():

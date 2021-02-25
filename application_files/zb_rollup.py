@@ -9,6 +9,7 @@ import zh_portfolio_beta as PortfolioBeta
 import os
 import openpyxl
 import xlsxwriter
+import shutil
 
 def write_overview_tab(xl_workbook, xl_worksheet, ledger_tabs, investments_tab, overview_entries):
 
@@ -240,22 +241,31 @@ def main():
 
     overview_entries = get_custom_cells()
 
-    xl_workbook = xlsxwriter.Workbook(ReadLedger.get_ledger_path())
+    original_path = ReadLedger.get_ledger_path()
+    xl_workbook = xlsxwriter.Workbook(original_path)
 
     overview_tab = xl_workbook.add_worksheet("Overview")
 
     ledger_account_collection = Ledger.get_accounts()
-    Ledger.archive_ledger()
-    ledger_tabs = Ledger.write_ledger(ledger_account_collection, xl_workbook)
+    archive_path = Ledger.archive_ledger()
+    try:
+        ledger_tabs = Ledger.write_ledger(ledger_account_collection, xl_workbook)
 
-    investments = Investments.get_investments()
-    investments_tab = Investments.write_worksheet(xl_workbook, investments)
+        investments = Investments.get_investments()
+        investments_tab = Investments.write_worksheet(xl_workbook, investments)
 
-    write_overview_tab(xl_workbook, overview_tab, ledger_tabs, investments_tab, overview_entries)
+        write_overview_tab(xl_workbook, overview_tab, ledger_tabs, investments_tab, overview_entries)
 
-    Excel.save_workbook(xl_workbook, ReadLedger.get_ledger_path())
+        new_path = ReadLedger.get_ledger_path()
 
-    PortfolioBeta.main(investments = investments)
+        Excel.save_workbook(xl_workbook, new_path)
+
+        PortfolioBeta.main(investments = investments)
+    except:
+        pass
+
+    if not os.path.isfile(new_path) and not os.path.isfile(original_path):
+        shutil.move(archive_path, original_path)
 
 
 if __name__ == "__main__":

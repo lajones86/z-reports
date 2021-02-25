@@ -625,7 +625,7 @@ def symbol_lookup():
         if not Io.yes_no("Run Beta lookup?"):
             return(0)
         symbol = input("Enter symbol: ").upper()
-        position = Instruments.StockPosition(symbol, 0)
+        position = Instruments.StockPosition(symbol, 0, quickrun = True)
         if Db.sync_history([position], "stock_shares") == 0:
             load_portfolio_betas([position])
             beta_sum = 0.00

@@ -7,7 +7,7 @@ import zr_security_info
 from yahoo_fin import stock_info as y_stock_info
 
 class StockPosition:
-    def __init__(self, symbol, quantity, emulated = None, risk_free = None, last_price = None, description = None):
+    def __init__(self, symbol, quantity, emulated = None, risk_free = None, last_price = None, description = None, quickrun = None):
 
         if emulated == None:
             emulated = False
@@ -37,8 +37,9 @@ class StockPosition:
             exit()
 
         self.calc_equity()
-        self.industry = str(zr_security_info.get_industry(self.symbol)).title()
-        self.purpose = str(zr_security_info.get_purpose(self.symbol)).title()
+        if quickrun != True:
+            self.industry = str(zr_security_info.get_industry(self.symbol)).title()
+            self.purpose = str(zr_security_info.get_purpose(self.symbol)).title()
 
         self.betas = []
 

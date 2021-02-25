@@ -282,6 +282,15 @@ class CsvFile:
     def find_by_dict_strcomp(self, dict_params):
         return(self.find_by_dict(dict_params, strcomp = True))
 
+    #return list of unique values in a named column
+    def find_unique_by_column(self, column_name):
+        unique_values = []
+        key_column = self.column_map.get_column_by_name(column_name)
+        for row in self.data:
+            value = row[key_column.final_position]
+            if not value in unique_values:
+                unique_values.append(value)
+        return(unique_values)
 
     def write_file(self, path, stop_on_write):
         if self.read_only:
@@ -294,11 +303,21 @@ class CsvFile:
         for row in self.data:
             output_csv_list.append(row)
 
-        with open(path, "w", newline = "") as f:
-            writer = csv.writer(f)
-            writer.writerows(output_csv_list)
+        file_open_success = False
+        while file_open_success != True:
+            try:
+                with open(path, "w", newline = "") as f:
+                    writer = csv.writer(f)
+                    writer.writerows(output_csv_list)
+                print("Wrote to %s" % path)
+                file_open_success = True
 
-        print("Wrote to %s" % path)
+            except PermissionError:
+                try_again_selection = zr_io.yes_no("Unable to write to file. Might be open. Try again?")
+                if try_again_selection == False:
+                    print("Write aborted")
+                    return(None)
+
         if stop_on_write:
             zr_io.message("Verify accuracy of file and run again. This is not an error.")
 
@@ -490,6 +509,8 @@ def test():
 
     for i in csv_file.return_all():
         print(i)
+
+    print(csv_file.find_unique_by_column("Stooge"))
 
     exit(0)
 
