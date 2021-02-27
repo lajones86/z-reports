@@ -262,10 +262,14 @@ def main():
 
         PortfolioBeta.main(investments = investments)
     except:
-        pass
-
-    if not os.path.isfile(new_path) and not os.path.isfile(original_path):
-        shutil.move(archive_path, original_path)
+        if not os.path.isfile(new_path) and not os.path.isfile(original_path):
+            print("Error encountered. Attempting to restore archive.")
+            shutil.move(archive_path, original_path)
+            if not os.path.isfile(original_path):
+                Io.nostop("Failed to restore archive. You must do it manually.")
+            else:
+                Io.nostop("Archive restored.")
+        raise
 
 
 if __name__ == "__main__":
