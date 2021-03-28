@@ -30,11 +30,12 @@ def main():
     symbol_string = symbol_string.rstrip(",")
 
     live_prices_request = MetalsApi.get_live_request(symbol_string)
-    live_prices = Api.make_api_request(live_prices_request)
+    live_prices = Api.make_api_request(live_prices_request, stop_on_err = False)
 
-    if live_prices["success"] == False:
-        print("Falling back to Yahoo futures for live metal prices.")
-        live_prices = None
+    if live_prices != None:
+        if live_prices["success"] == False:
+            print("Falling back to Yahoo futures for live metal prices.")
+            live_prices = None
 
     return_metals = []
 

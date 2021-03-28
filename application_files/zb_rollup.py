@@ -249,6 +249,7 @@ def main():
     ledger_account_collection = Ledger.get_accounts()
     archive_path = Ledger.archive_ledger()
     try:
+        new_path = None
         ledger_tabs = Ledger.write_ledger(ledger_account_collection, xl_workbook)
 
         investments = Investments.get_investments()
@@ -262,6 +263,8 @@ def main():
 
         PortfolioBeta.main(investments = investments)
     except:
+        if not new_path:
+            new_path = original_path
         if not os.path.isfile(new_path) and not os.path.isfile(original_path):
             print("Error encountered. Attempting to restore archive.")
             shutil.move(archive_path, original_path)

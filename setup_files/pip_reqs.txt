@@ -4,3 +4,4 @@ pandas
 requests-html
 yahoo-fin
 mechanicalsoup
+openpyxl
