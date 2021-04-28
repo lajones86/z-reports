@@ -25,7 +25,7 @@ def get_manual_average_beta(position):
                 [position.symbol, "-9001"]
                 ]
 
-        manual_beta_csv = Csv.CsvFile(Config.get_beta("manual_averages"), default_column_list = columns, default_data_rows = default_rows, stop_on_write = False, read_only = False)
+        manual_beta_csv = Csv.CsvFile(Config.get_beta("manual_averages"), default_column_list = columns, default_data_rows = default_rows, read_only = True)
 
         manual_beta = manual_beta_csv.find_by_id(position.symbol)["Beta"]
 
