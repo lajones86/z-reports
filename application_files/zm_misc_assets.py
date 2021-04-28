@@ -13,7 +13,7 @@ def get_sum():
     default_column_map = [
             Csv.CsvColumn(name = "Description", data_type = "str", is_row_identifier = True),
             Csv.CsvColumn(name = "Serial No.", data_type = "str"),
-            Csv.CsvColumn(name = "Estimated Value", data_type = "float")
+            Csv.CsvColumn(name = "Estimated Value", data_type = "float"),
             Csv.CsvColumn(name = "Notes", data_type = "str")
             ]
     default_data_rows = []
