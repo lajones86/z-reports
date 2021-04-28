@@ -5,6 +5,7 @@ import zr_excel as Excel
 import zr_io as Io
 import zl_liabilities as Liabilities
 import zh_portfolio_beta as PortfolioBeta
+import zm_misc_assets as MiscAssets
 
 import os
 import openpyxl
@@ -225,7 +226,10 @@ def get_custom_cells():
     custom_cells.append(["Cash", cash_value])
 
     for row in range(3, xl_worksheet.max_row + 1):
-        blanks = [None, ""]
+        #probably should have called this "skip_these_entries" rather than "blanks",
+        #but at the time, i only intended to skip blanks
+        #now the functionality is already there, so i'm tying into it
+        blanks = [None, "", "Misc Assets"]
         asset_desc = (xl_worksheet.cell(row = row, column = 6)).value
         asset_amt = (xl_worksheet.cell(row = row, column = 7)).value
         liab_desc = (xl_worksheet.cell(row = row, column = 9)).value
@@ -233,7 +237,10 @@ def get_custom_cells():
         if not asset_desc in blanks or not asset_amt in blanks:
             assets.append([asset_desc, round(float(asset_amt), 2)])
         if not liab_desc in blanks or not liab_amt in blanks:
-            liabilities.append([liab_desc, round(float(liab_amt), 2)])        
+            liabilities.append([liab_desc, round(float(liab_amt), 2)])
+
+    #add in misc assets from separate file
+    assets.append(["Misc Assets", round(float(MiscAssets.get_sum()), 2)])
 
     return([custom_cells, assets, liabilities])
 

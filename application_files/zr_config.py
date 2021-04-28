@@ -70,6 +70,7 @@ def get_path(key):
             "electrum_btc_wallets" : os.path.join(os.environ.get("APPDATA"), r"Electrum\wallets"),
             "mycrypto_eth_wallets" : os.path.join(os.environ.get("APPDATA"), r"MyCrypto\Local Storage\leveldb"),
             "metals_csv" : os.path.join(environment("assets_dir"), "metals.csv"),
+            "misc_assets_csv" : os.path.join(environment("assets_dir"), "misc_assets.csv"),
             "ex_rates_dir" : os.path.join(environment("data_dir"), r"ex_rates"),
             "accounts_csv" : os.path.join(environment("cash_flows_dir"), r"accounts.csv"),
             "money_dir" : environment("money_dir"),
