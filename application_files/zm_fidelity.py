@@ -5,6 +5,10 @@ import zr_financial_instruments as Instruments
 import zr_io
 
 from lxml import html as lxml_html
+import re
+
+options_formats = ["\-?[A-Z]{1,5}[0-9]{6}[C,P][0-9]{1,7}\.?[0-9]{1,2}?"]
+
 
 def get_account(download_dirs = None):
     fidelity_file = zt_extractor.get_extractor_file("fidelity", download_dirs = download_dirs)
@@ -51,8 +55,14 @@ def get_account(download_dirs = None):
             print("Setting cash position.")
             fidelity_account.cash_position = float(quantity)
         else:
-            print("Processing %s" % symbol)
-            fidelity_account.add_position_by_data(symbol, quantity)
+            is_option = False
+            for options_format in options_formats:
+                if re.match(options_format, symbol):
+                    is_option = True
+                    break
+            if not is_option:
+                print("Processing %s" % symbol)
+                fidelity_account.add_position_by_data(symbol, quantity)
 
     #add pending activity to cash position
     print("Adjusting cash position with pending activity")
@@ -72,7 +82,8 @@ def get_account(download_dirs = None):
 if __name__ == "__main__":
     x = get_account()
     total_equity = float(0)
-    for position in x.positions:
+    for position in x.stock_positions:
         print(position.symbol, position.quantity, position.equity)
         total_equity += position.equity
-    print(total_equity)
+    total_equity += x.cash_position
+    print("Total equity: %s" % (str(total_equity)))

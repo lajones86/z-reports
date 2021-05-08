@@ -41,7 +41,9 @@ def get_used_electrum_addresses(wallet_dir, leading_id):
                         else:
                             line = line.strip().strip("\",")
                             if line.startswith(leading_id) and not line.endswith("[]"):
-                                address_list.append(line.rstrip("\": ["))
+                                new_address = line.rstrip("\": [")
+                                if not new_address in address_list:
+                                    address_list.append(new_address)
     return(address_list)
 
 def get_mycrypto_addresses(mycrypto_dir):
