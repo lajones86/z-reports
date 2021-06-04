@@ -1,5 +1,6 @@
 import zr_financial_concepts as Concepts
 import zm_fidelity as Fidelity
+import zm_webull as Webull
 import zm_treasuries as Treasuries
 import zm_crypto as Crypto
 import zm_metals as Metals
@@ -11,8 +12,10 @@ import os
 import xlsxwriter
 
 def get_brokerages():
-    fidelity_account = Fidelity.get_account()
-    return([fidelity_account])
+    brokerages = []
+    brokerages.append(Fidelity.get_account())
+    brokerages.append(Webull.get_account())
+    return(brokerages)
 
 def get_investments():
     investments = Concepts.Investments()
