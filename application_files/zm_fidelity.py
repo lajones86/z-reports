@@ -47,7 +47,12 @@ def get_account(download_dirs = None):
         symbol_span = (zt_html.get_by_xpath(tr, ".//span[@class='stock-symbol']",
                 min_results = 1, max_results = 1,
                 description = "Fidelity table symbol span"))[0]
+        stock_name_span = (zt_html.get_by_xpath(tr, ".//span[@class='stock-name']",
+                min_results = 1, max_results = 1,
+                description = "Fidelity table stock name span"))[0]
+
         symbol = str(symbol_span.text).strip()
+        stock_name = str(stock_name_span.text).strip()
 
         quantity = float((tr[table_map["quantity"]]).text.replace(",", ""))
 
@@ -60,6 +65,11 @@ def get_account(download_dirs = None):
                 if re.match(options_format, symbol):
                     is_option = True
                     break
+
+            #treat warrants like options
+            if "WTS EXP" in stock_name:
+                is_option = True
+
             if not is_option:
                 print("Processing %s" % symbol)
                 fidelity_account.add_position_by_data(symbol, quantity)
